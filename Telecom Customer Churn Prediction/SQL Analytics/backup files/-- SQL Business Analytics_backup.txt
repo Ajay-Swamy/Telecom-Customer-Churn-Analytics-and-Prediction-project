@@ -1,0 +1,510 @@
+-- SQL Business Analytics
+--We'll divide it into four sections.
+
+--A. Business KPIs
+--B. Customer Segmentation
+--C. Service Analysis
+--D. Revenue Analysis
+
+------------------------------Business KPIs---------------------------------------
+
+-- Query 1: Total Customers
+select count(*)as total_customers
+from telecom.telecom_churn;
+
+
+--Query 2: Total Churned Customers
+select count(*) as Churned_Customers
+from telecom.telecom_churn
+where Churn='Yes';
+
+
+-- Query 3: Active Customers
+select count(*) as Churned_Customers
+from telecom.telecom_churn
+where Churn='No';
+
+
+--Query 4: Churn Rate
+select round(
+count(*) filter(where Churn='Yes')*100
+/
+count(*)
+,2
+	) as Churn_Rate
+from telecom.telecom_churn
+
+
+--Query 5: Average Monthly Charges
+select 
+	round(avg(MonthlyCharges),2) as Avg_charges
+from telecom.telecom_churn;
+
+
+--Query 6: Average Tenure
+select 
+	round(avg(tenure),2) as Avg_tenure
+from telecom.telecom_churn;
+
+
+--Query 7: Total Revenue
+select
+round(
+sum(TotalCharges::NUMERIC),
+2
+)
+as total_revenue
+from telecom.telecom_churn;
+
+
+----------------------------Customer Segmentation------------------------------------
+
+
+
+--Query 8: Churn by Gender
+select 
+	gender,
+	count(*) filter(where Churn='Yes') as Churned_Customers,
+	count(*) filter(where Churn='No') as Active_Customers
+from 
+	telecom.telecom_churn
+group by 
+	gender;
+
+
+
+--Query 9: Churn by Contract
+select 
+	Contract,
+	count(*) as Customers,
+	count(*) filter(where Churn='Yes') as Churned_Customers,
+	round(
+		count(*) filter(where Churn='Yes')*100
+		/count(*),
+		2
+	) as Churn_Rate
+from 
+	telecom.telecom_churn
+group by 
+	Contract
+order by 
+	Churn_rate DESC;
+
+
+--Query 10: Churn by Internet Service
+
+select 
+	InternetService,
+	count(*) as Customers,
+	count(*) filter(where Churn='Yes') as Churned_Customers,
+	round(
+		count(*) filter(where Churn='Yes')*100
+		/
+		count(*),
+		2
+	)as Churn_Rate
+from 
+	telecom.telecom_churn
+group by 
+	InternetService
+order by 
+	Churn_rate DESC;
+	
+
+
+-- Interpretation----
+
+/*
+	Customers with month-to-month contracts have the highest churn rate because
+	they are not bound by long-term commitments. This suggests that contract 
+	flexibility increases the likelihood of customers switching to competitors. 
+	The company should focus retention campaigns on these customers by offering 
+	incentives to migrate to one-year or two-year contracts.
+*/
+
+/*
+	Customers subscribed to Fiber Optic internet exhibit the highest
+	churn rate (approximately 41%). This indicates a strong association between 
+	Fiber Optic service and customer attrition. Further investigation into pricing, 
+	service quality, network reliability, and customer satisfaction is recommended 
+	before concluding the root cause.
+*/
+
+
+--Query11 : Which payment method has the highest churn rate?
+select 
+	PaymentMethod,
+	count(*) as Customers,
+	count(*) filter(where Churn='Yes') as Churned_Customers,
+	round(
+		count(*) filter(where Churn='Yes')*100.0
+		/
+		count(*),
+		2
+	)as Churn_Rate
+from 
+	telecom.telecom_churn
+group by 
+	PaymentMethod
+order by 
+	Churn_rate DESC;
+
+
+/*
+============================================================
+Query 12 : Churn by Senior Citizen
+------------------------------------------------------------
+Business Question:
+Do senior citizens churn more than non-senior customers?
+
+Objective:
+Compare churn rates between senior and non-senior customers.
+
+SQL Concepts:
+GROUP BY, FILTER, COUNT, ROUND
+
+Business Outcome:
+Identify whether senior citizens require targeted retention
+strategies.
+============================================================
+*/
+
+select 
+	SeniorCitizen,
+	count(*) as Total_citizens,
+	count(*) filter(where Churn='Yes') as Churned_Customers,
+	round(
+		count(*) filter(where Churn='Yes')*100.0
+		/
+		count(*),
+		2
+	)as Churn_Rate
+from 
+	telecom.telecom_churn
+group by 
+	SeniorCitizen
+order by 
+	Churn_rate DESC;
+
+
+/*
+============================================================
+Query 13 : Churn by Partner
+============================================================
+*/
+
+select 
+	Partner,
+	count(*) as Total_citizens,
+	count(*) filter(where Churn='Yes') as Churned_Customers,
+	round(
+		count(*) filter(where Churn='Yes')*100.0
+		/
+		count(*),
+		2
+	)as Churn_Rate
+from 
+	telecom.telecom_churn
+group by 
+	Partner
+order by 
+	Churn_rate DESC;
+
+
+/*
+============================================================
+Query 14 : Churn by Dependents
+============================================================
+*/
+
+select 
+	Dependents,
+	count(*) as Total_citizens,
+	count(*) filter(where Churn='Yes') as Churned_Customers,
+	round(
+		count(*) filter(where Churn='Yes')*100.0
+		/
+		count(*),
+		2
+	)as Churn_Rate
+from 
+	telecom.telecom_churn
+group by 
+	Dependents
+order by 
+	Churn_rate DESC;
+
+-------------------------Service Analysis------------------------
+
+
+/*
+============================================================
+Query 15 : Churn by Phone Service
+============================================================
+*/
+
+SELECT
+    PhoneService,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY PhoneService
+ORDER BY churn_rate DESC;
+
+
+/*
+============================================================
+Query 16 : Churn by Multiple Lines
+============================================================
+*/
+
+SELECT
+    MultipleLines,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY MultipleLines
+ORDER BY churn_rate DESC;
+
+
+/*
+============================================================
+Query 17 : Churn by Online Security
+============================================================
+*/
+
+SELECT
+    OnlineSecurity,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY OnlineSecurity
+ORDER BY churn_rate DESC;
+
+/*
+============================================================
+Query 18 : Churn by Online Backup
+============================================================
+*/
+
+SELECT
+    OnlineBackup,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY OnlineBackup
+ORDER BY churn_rate DESC;
+
+
+
+/*
+============================================================
+Query 19 : Churn by Device Protection
+============================================================
+*/
+
+SELECT
+    DeviceProtection,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY DeviceProtection
+ORDER BY churn_rate DESC;
+
+/*
+============================================================
+Query 20 : Churn by Tech Support
+============================================================
+*/
+
+SELECT
+    TechSupport,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY TechSupport
+ORDER BY churn_rate DESC;
+
+
+/*
+============================================================
+Query 21 : Churn by Streaming TV
+============================================================
+*/
+
+SELECT
+    StreamingTV,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY StreamingTV
+ORDER BY churn_rate DESC;
+
+
+/*
+============================================================
+Query 22 : Churn by Streaming Movies
+============================================================
+*/
+
+SELECT
+    StreamingMovies,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY StreamingMovies
+ORDER BY churn_rate DESC;
+
+
+/*
+============================================================
+Query 23 : Churn by Paperless Billing
+============================================================
+*/
+
+SELECT
+    PaperlessBilling,
+    COUNT(*) AS total_customers,
+    COUNT(*) FILTER (WHERE Churn='Yes') AS churned_customers,
+    ROUND(
+        COUNT(*) FILTER (WHERE Churn='Yes') * 100.0
+        / COUNT(*),
+        2
+    ) AS churn_rate
+FROM telecom.telecom_churn
+GROUP BY PaperlessBilling
+ORDER BY churn_rate DESC;
+
+
+-------------------------Revenue Analysis--------------------
+/*
+============================================================
+Query 24 : Revenue by Contract Type
+============================================================
+*/
+
+SELECT
+    Contract,
+    ROUND(SUM(TotalCharges::NUMERIC),2) AS total_revenue
+FROM telecom.telecom_churn
+GROUP BY Contract
+ORDER BY total_revenue DESC;
+
+
+/*
+============================================================
+Query 25 : Revenue by Internet Service
+============================================================
+*/
+
+SELECT
+    InternetService,
+    ROUND(SUM(TotalCharges::NUMERIC),2) AS total_revenue
+FROM telecom.telecom_churn
+GROUP BY InternetService
+ORDER BY total_revenue DESC;
+
+
+/*
+============================================================
+Query 26 : Revenue by Payment Method
+============================================================
+*/
+
+SELECT
+    PaymentMethod,
+    ROUND(SUM(TotalCharges::NUMERIC),2) AS total_revenue
+FROM telecom.telecom_churn
+GROUP BY PaymentMethod
+ORDER BY total_revenue DESC;
+
+/*
+============================================================
+Query 27 :Average Monthly Charges by Contract
+============================================================
+*/
+
+SELECT
+    Contract,
+    ROUND(AVG(MonthlyCharges),2) AS avg_monthly_charge
+FROM telecom.telecom_churn
+GROUP BY Contract
+ORDER BY avg_monthly_charge DESC;
+
+/*
+============================================================
+Query 28 :Average Total Charges by Contract
+============================================================
+*/
+SELECT
+    Contract,
+    ROUND(AVG(TotalCharges::NUMERIC),2) AS avg_total_charge
+FROM telecom.telecom_churn
+GROUP BY Contract
+ORDER BY avg_total_charge DESC;
+
+/*
+============================================================
+Query 29 :Revenue Lost Due to Churn
+============================================================
+*/
+SELECT
+    ROUND(SUM(TotalCharges::NUMERIC),2) AS revenue_lost
+FROM telecom.telecom_churn
+WHERE Churn='Yes';
+
+
+/*
+============================================================
+Query 30 :Revenue by Churn Status
+============================================================
+*/
+SELECT
+    Churn,
+    ROUND(SUM(TotalCharges::NUMERIC),2) AS total_revenue,
+    COUNT(*) AS total_customers
+FROM telecom.telecom_churn
+GROUP BY Churn;
+
+
+
